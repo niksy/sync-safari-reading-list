@@ -30,7 +30,7 @@ syncList({
 
 Returns: `Promise`
 
-Sync Safari Reading List to Pinboard. If file path to Safari Reading List is not provided, it uses default argument from [read-safari-reading-list](https://github.com/niksy/read-safari-reading-list#readlistfilepath)
+Sync Safari Reading List to Pinboard. If file path to Safari Reading List is not provided, it uses default argument from [read-safari-reading-list](https://github.com/niksy/read-safari-reading-list#readlistfilepath).
 
 #### filePath
 
