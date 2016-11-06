@@ -1,25 +1,27 @@
-var assert = require('assert');
-var url = require('url');
-var readList = require('read-safari-reading-list');
-var nock = require('nock');
-var rewire = require('rewire');
-var proxyquire = require('proxyquire');
-var fn = require('../');
+'use strict';
 
-var links = './test/fixtures/links.plist';
-var apiToken = 'token';
-var pinboard;
+const assert = require('assert');
+const url = require('url');
+const readList = require('read-safari-reading-list');
+const nock = require('nock');
+const rewire = require('rewire');
+const proxyquire = require('proxyquire');
+const fn = require('../');
+
+const links = './test/fixtures/links.plist';
+const apiToken = 'token';
+let pinboard;
 
 function beforeNetworkMock ( opts ) {
 
 	pinboard = rewire('node-pinboard');
 
-	return function () {
+	return () => {
 		return readList(opts.links)
-			.then(function ( data ) {
-				return data.map(function ( item ) {
-					var parsedUrl = url.parse(item.url);
-					var pathname = parsedUrl.pathname;
+			.then(( data ) => {
+				return data.map(( item ) => {
+					const parsedUrl = url.parse(item.url);
+					const pathname = parsedUrl.pathname;
 					delete parsedUrl.pathname;
 					return [
 						nock(url.format(parsedUrl))
@@ -46,7 +48,7 @@ describe('Invalid options', function () {
 
 	it('should throw if Pinboard API token is not provided', function () {
 		return fn(links)
-			.catch(function ( err ) {
+			.catch(( err ) => {
 				assert.equal(typeof err, 'string');
 			});
 	});
@@ -63,8 +65,8 @@ describe('Send links from default Safari Reading List', function () {
 
 	it('should sync Safari Reading List links with Pinboard', function () {
 
-		var pfn = proxyquire('../', {
-			'read-safari-reading-list': function () {
+		const pfn = proxyquire('../', {
+			'read-safari-reading-list': () => {
 				return readList(links);
 			}
 		});
@@ -72,7 +74,7 @@ describe('Send links from default Safari Reading List', function () {
 		return pfn({
 			apiToken: apiToken
 		})
-			.then(function ( res ) {
+			.then(( res ) => {
 				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
 					{
@@ -104,7 +106,7 @@ describe('Send links from defined Safari Reading List', function () {
 		return fn(links, {
 			apiToken: apiToken
 		})
-			.then(function ( res ) {
+			.then(( res ) => {
 				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
 					{
@@ -133,8 +135,8 @@ describe('Clear Safari Reading List', function () {
 
 	it('should clear Safari Reading List links when it’s finished with syncing to Pinboard', function () {
 
-		var pfn = proxyquire('../', {
-			'write-safari-reading-list': function () {
+		const pfn = proxyquire('../', {
+			'write-safari-reading-list': () => {
 				return Promise.resolve();
 			}
 		});
@@ -143,7 +145,7 @@ describe('Clear Safari Reading List', function () {
 			apiToken: apiToken,
 			clearList: true
 		})
-			.then(function ( res ) {
+			.then(( res ) => {
 				assert.equal(res.length, 3);
 			});
 
@@ -165,7 +167,7 @@ describe('Don’t clean URLs', function () {
 			apiToken: apiToken,
 			cleanUrls: false
 		})
-			.then(function ( res ) {
+			.then(( res ) => {
 				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
 					{
@@ -196,8 +198,8 @@ describe('Error while contacting Pinboard', function () {
 
 		it('should reject if syncing with Pinboard wasn’t successful', function () {
 
-			var pfn = proxyquire('../', {
-				'read-safari-reading-list': function () {
+			const pfn = proxyquire('../', {
+				'read-safari-reading-list': () => {
 					return readList(links);
 				}
 			});
@@ -205,7 +207,7 @@ describe('Error while contacting Pinboard', function () {
 			return pfn({
 				apiToken: apiToken
 			})
-				.catch(function ( err ) {
+				.catch(( err ) => {
 					assert.equal(err, 'Error while syncing with Pinboard: something went wrong');
 				});
 
@@ -223,8 +225,8 @@ describe('Error while contacting Pinboard', function () {
 
 		it('should reject if Pinboard API token is invalid', function () {
 
-			var pfn = proxyquire('../', {
-				'read-safari-reading-list': function () {
+			const pfn = proxyquire('../', {
+				'read-safari-reading-list': () => {
 					return readList(links);
 				}
 			});
@@ -232,7 +234,7 @@ describe('Error while contacting Pinboard', function () {
 			return pfn({
 				apiToken: apiToken
 			})
-				.catch(function ( err ) {
+				.catch(( err ) => {
 					assert.equal(err, 'Unknown error occured while syncing with Pinboard.');
 				});
 

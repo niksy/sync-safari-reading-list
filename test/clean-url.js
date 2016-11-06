@@ -1,8 +1,10 @@
-var assert = require('assert');
-var fn = require('../lib/clean-url');
+'use strict';
 
-var utmPart = '?utm_campaign=RSS-Feedburner-All-Partial&utm_cid=RSS-Feedburner-All-Partial&utm_medium=feed&utm_source=feedly&utm_reader=feedly&z=last&m=middle&a=first&t=upper-middle';
-var cleanUtmPart = '?a=first&m=middle&t=upper-middle&z=last';
+const assert = require('assert');
+const fn = require('../lib/clean-url');
+
+const utmPart = '?utm_campaign=RSS-Feedburner-All-Partial&utm_cid=RSS-Feedburner-All-Partial&utm_medium=feed&utm_source=feedly&utm_reader=feedly&z=last&m=middle&a=first&t=upper-middle';
+const cleanUtmPart = '?a=first&m=middle&t=upper-middle&z=last';
 
 describe('clean-url', function () {
 

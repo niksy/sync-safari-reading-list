@@ -1,9 +1,11 @@
-var pify = require('pify');
-var readList = require('read-safari-reading-list');
-var writeList = require('write-safari-reading-list');
-var Pinboard = require('node-pinboard');
-var request = require('request');
-var cleanUrl = require('./lib/clean-url');
+'use strict';
+
+const pify = require('pify');
+const readList = require('read-safari-reading-list');
+const writeList = require('write-safari-reading-list');
+const Pinboard = require('node-pinboard');
+const request = require('request');
+const cleanUrl = require('./lib/clean-url');
 
 /**
  * @param  {Object} item
@@ -16,7 +18,7 @@ function prepareItem ( item ) {
 		url: item.url,
 		followAllRedirects: true
 	})
-		.then(function ( res ) {
+		.then(( res ) => {
 			return {
 				url: res[0].request.href,
 				description: item.title,
@@ -44,7 +46,13 @@ function syncItem ( pinboard, item ) {
 		});
 }
 
-module.exports = function ( fp, opts ) {
+/**
+ * @param  {String} fp
+ * @param  {Object} opts
+ *
+ * @return {Promise}
+ */
+module.exports = ( fp, opts ) => {
 
 	var pinboard;
 
@@ -64,25 +72,25 @@ module.exports = function ( fp, opts ) {
 	pinboard = new Pinboard(opts.apiToken);
 
 	return readList(fp)
-		.then(function ( data ) {
+		.then(( data ) => {
 			return Promise.all(data.map(prepareItem));
 		})
-		.then(function ( data ) {
-			return data.map(function ( item ) {
+		.then(( data ) => {
+			return data.map(( item ) => {
 				return Object.assign({}, item, {
 					url: opts && opts.cleanUrls ? cleanUrl(item.url) : item.url
 				});
 			});
 		})
-		.then(function ( data ) {
-			return Promise.all(data.map(function ( item ) {
+		.then(( data ) => {
+			return Promise.all(data.map(( item ) => {
 				return syncItem(pinboard, item);
 			}));
 		})
-		.then(function ( res ) {
+		.then(( res ) => {
 			if ( opts && opts.clearList ) {
 				return writeList(fp, [])
-					.then(function () {
+					.then(() => {
 						return res;
 					});
 			}
