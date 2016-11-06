@@ -5,6 +5,11 @@ var Pinboard = require('node-pinboard');
 var request = require('request');
 var cleanUrl = require('./lib/clean-url');
 
+/**
+ * @param  {Object} item
+ *
+ * @return {Promise}
+ */
 function prepareItem ( item ) {
 	return pify(request, { multiArgs: true })({
 		method: 'HEAD',
@@ -17,6 +22,25 @@ function prepareItem ( item ) {
 				description: item.title,
 				toread: 'yes'
 			};
+		});
+}
+
+/**
+ * @param  {Pinboard} pinboard
+ * @param  {Object} item
+ *
+ * @return {Promise}
+ */
+function syncItem ( pinboard, item ) {
+	return pify(pinboard.add.bind(pinboard))(item)
+		.then(( res ) => {
+			if ( typeof res === 'undefined' ) {
+				return Promise.reject('Unknown error occured while syncing with Pinboard.');
+			}
+			if ( res.result_code !== 'done' ) {
+				return Promise.reject(`Error while syncing with Pinboard: ${res.result_code}`);
+			}
+			return res;
 		});
 }
 
@@ -52,7 +76,7 @@ module.exports = function ( fp, opts ) {
 		})
 		.then(function ( data ) {
 			return Promise.all(data.map(function ( item ) {
-				return pify(pinboard.add.bind(pinboard))(item);
+				return syncItem(pinboard, item);
 			}));
 		})
 		.then(function ( res ) {
