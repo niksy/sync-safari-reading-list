@@ -70,8 +70,11 @@ describe('Send links from default Safari Reading List', function () {
 			apiToken: apiToken
 		})
 			.then(function ( res ) {
-				assert.equal(res.length, 2);
+				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
+					{
+						'result_code': 'done'
+					},
 					{
 						'result_code': 'done'
 					},
@@ -96,8 +99,11 @@ describe('Send links from defined Safari Reading List', function () {
 			apiToken: apiToken
 		})
 			.then(function ( res ) {
-				assert.equal(res.length, 2);
+				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
+					{
+						'result_code': 'done'
+					},
 					{
 						'result_code': 'done'
 					},
@@ -129,7 +135,7 @@ describe('Clear Safari Reading List', function () {
 			clearList: true
 		})
 			.then(function ( res ) {
-				assert.equal(res.length, 2);
+				assert.equal(res.length, 3);
 			});
 
 	});
@@ -148,8 +154,11 @@ describe('Don’t clean URLs', function () {
 			cleanUrls: false
 		})
 			.then(function ( res ) {
-				assert.equal(res.length, 2);
+				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
+					{
+						'result_code': 'done'
+					},
 					{
 						'result_code': 'done'
 					},
