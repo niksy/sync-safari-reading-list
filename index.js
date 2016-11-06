@@ -5,7 +5,7 @@ const readList = require('read-safari-reading-list');
 const writeList = require('write-safari-reading-list');
 const Pinboard = require('node-pinboard');
 const request = require('request');
-const cleanUrl = require('./lib/clean-url');
+const stripMobileUrl = require('strip-mobile-url');
 
 /**
  * @param  {Object} item
@@ -78,7 +78,7 @@ module.exports = ( fp, opts ) => {
 		.then(( data ) => {
 			return data.map(( item ) => {
 				return Object.assign({}, item, {
-					url: opts && opts.cleanUrls ? cleanUrl(item.url) : item.url
+					url: opts && opts.cleanUrls ? stripMobileUrl(item.url) : item.url
 				});
 			});
 		})

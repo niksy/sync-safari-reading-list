@@ -13,11 +13,10 @@
   },
   "dependencies": {
     "node-pinboard": "^1.0.0",
-    "normalize-url": "^1.6.0",
-    "parse-domain": "^0.2.1",
     "pify": "^2.3.0",
     "read-safari-reading-list": "^1.0.1",
     "request": "^2.74.0",
+    "strip-mobile-url": "^1.0.0",
     "write-safari-reading-list": "^1.0.2"
   },
   "devDependencies": {
