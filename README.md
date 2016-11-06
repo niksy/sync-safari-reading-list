@@ -13,14 +13,15 @@ npm install sync-safari-reading-list --save
 ## Usage
 
 ```js
-var syncList = require('sync-safari-reading-list');
+const syncList = require('sync-safari-reading-list');
+const token = 'PINBOARD_API_TOKEN';
 
 syncList({
-	apiToken: PINBOARD_API_TOKEN
+	apiToken: token
 })
-	.then(function ( responses ) {
-		console.log(responses);
-		// => [{ result_code: 'done' }, …]
+	.then(( res ) => {
+		console.log(res);
+		// [{ result_code: 'done' }, …]
 	});
 ```
 
@@ -46,8 +47,7 @@ Type: `Object`
 
 ##### apiToken
 
-Type: `String`  
-**Required**
+Type: `String`
 
 Pinboard API token.
 
