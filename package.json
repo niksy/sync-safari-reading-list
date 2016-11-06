@@ -1,6 +1,6 @@
 {
   "name": "sync-safari-reading-list",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sync Safari Reading List to Pinboard bookmarking service.",
   "main": "index.js",
   "author": "Ivan Nikolić <niksy5@gmail.com> (http://ivannikolic.com)",
