@@ -4,7 +4,7 @@ const pify = require('pify');
 const readList = require('read-safari-reading-list');
 const writeList = require('write-safari-reading-list');
 const Pinboard = require('node-pinboard');
-const request = require('request');
+const got = require('got');
 const stripMobileUrl = require('strip-mobile-url');
 
 /**
@@ -13,14 +13,10 @@ const stripMobileUrl = require('strip-mobile-url');
  * @return {Promise}
  */
 function prepareItem ( item ) {
-	return pify(request, { multiArgs: true })({
-		method: 'HEAD',
-		url: item.url,
-		followAllRedirects: true
-	})
+	return got.head(item.url)
 		.then(( res ) => {
 			return {
-				url: res[0].request.href,
+				url: res.url,
 				description: item.title,
 				toread: 'yes'
 			};

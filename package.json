@@ -12,10 +12,10 @@
     "test": "eslint '{index,test/**/*}.js' && nyc mocha test/**/*.js && nyc check-coverage"
   },
   "dependencies": {
+    "got": "^6.7.1",
     "node-pinboard": "^1.0.0",
     "pify": "^2.3.0",
     "read-safari-reading-list": "^1.0.1",
-    "request": "^2.74.0",
     "strip-mobile-url": "^1.0.0",
     "write-safari-reading-list": "^1.0.2"
   },
