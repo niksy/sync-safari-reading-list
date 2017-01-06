@@ -21,7 +21,12 @@ syncList({
 })
 	.then(( res ) => {
 		console.log(res);
-		// [{ result_code: 'done' }, …]
+		/* [{
+			url: 'http://example.com/katie',
+			pinboardResponse: {
+				result_code: 'done'
+			}
+		}, …] */
 	});
 ```
 
@@ -56,10 +61,7 @@ Pinboard API token.
 Type: `Boolean`  
 Default: `true`
 
-Cleans URLs from:
-
-* mobile subdomains
-* UTM query parameters
+Perform redirects and cleans URLs from mobile subdomains and UTM query parameters.
 
 ##### clearList
 

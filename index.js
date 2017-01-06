@@ -9,14 +9,16 @@ const stripMobileUrl = require('strip-mobile-url');
 
 /**
  * @param  {Object} item
+ * @param  {Boolean} cleanUrls
  *
  * @return {Promise}
  */
-function prepareItem ( item ) {
-	return got.head(item.url)
+function prepareItem ( item, cleanUrls ) {
+	const promise = cleanUrls ? got.head(item.url) : Promise.resolve({ url: item.url });
+	return promise
 		.then(( res ) => {
 			return {
-				url: res.url,
+				url: cleanUrls ? stripMobileUrl(res.url) : res.url,
 				description: item.title,
 				toread: 'yes'
 			};
@@ -38,7 +40,10 @@ function syncItem ( pinboard, item ) {
 			if ( res.result_code !== 'done' ) {
 				return Promise.reject(`Error while syncing with Pinboard: ${res.result_code}`);
 			}
-			return res;
+			return {
+				url: item.url,
+				pinboardResponse: res
+			};
 		});
 }
 
@@ -67,14 +72,9 @@ module.exports = ( fp, opts ) => {
 
 	return readList(fp)
 		.then(( data ) => {
-			return Promise.all(data.map(prepareItem));
-		})
-		.then(( data ) => {
-			return data.map(( item ) => {
-				return Object.assign({}, item, {
-					url: opts && opts.cleanUrls ? stripMobileUrl(item.url) : item.url
-				});
-			});
+			return Promise.all(data.map(( item ) => {
+				return prepareItem(item, opts.cleanUrls);
+			}));
 		})
 		.then(( data ) => {
 			return Promise.all(data.map(( item ) => {

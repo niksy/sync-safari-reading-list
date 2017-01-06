@@ -9,7 +9,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "eslint '{index,test/**/*}.js' && nyc mocha test/**/*.js && nyc check-coverage"
+    "test": "eslint '{index,test/**/*}.js' && nyc mocha 'test/**/*.js' && nyc check-coverage"
   },
   "dependencies": {
     "got": "^6.7.1",

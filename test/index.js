@@ -10,38 +10,35 @@ const fn = require('../');
 
 const links = './test/fixtures/links.plist';
 const apiToken = 'token';
-let pinboard;
 
-function beforeNetworkMock ( opts ) {
+function prepareMock ( opts ) {
+	const pinboard = rewire('node-pinboard');
+	return {
+		before: () => {
+			return readList(opts.links)
+				.then(( data ) => {
+					return data.map(( item ) => {
+						const parsedUrl = url.parse(item.url, true);
+						return [
+							nock(`${parsedUrl.protocol}//${parsedUrl.hostname}`)
+								.head(parsedUrl.pathname)
+								.query(parsedUrl.query)
+								.reply(200),
+							nock(pinboard.__get__('API_URL'))
+								.get('/posts/add')
+								.query(true)
+								.reply(200, (opts.invalidApiToken ? undefined : { // eslint-disable-line no-undefined
+									'result_code': (opts.success ? 'done' : 'something went wrong')
+								}))
+						];
 
-	pinboard = rewire('node-pinboard');
-
-	return () => {
-		return readList(opts.links)
-			.then(( data ) => {
-				return data.map(( item ) => {
-					const parsedUrl = url.parse(item.url);
-					const pathname = parsedUrl.pathname;
-					delete parsedUrl.pathname;
-					return [
-						nock(url.format(parsedUrl))
-							.head(pathname)
-							.reply(200),
-						nock(pinboard.__get__('API_URL'))
-							.get('/posts/add')
-							.query(true)
-							.reply(200, (opts.invalidApiToken ? undefined : { // eslint-disable-line no-undefined
-								'result_code': (opts.success ? 'done' : 'something went wrong')
-							}))
-					];
-
+					});
 				});
-			});
+		},
+		after: () => {
+			pinboard();
+		}
 	};
-}
-
-function afterNetworkMock () {
-	pinboard();
 }
 
 describe('Invalid options', function () {
@@ -57,11 +54,12 @@ describe('Invalid options', function () {
 
 describe('Send links from default Safari Reading List', function () {
 
-	before(beforeNetworkMock({
+	const mock = prepareMock({
 		links: links,
 		success: true
-	}));
-	after(afterNetworkMock);
+	});
+	before(mock.before);
+	after(mock.after);
 
 	it('should sync Safari Reading List links with Pinboard', function () {
 
@@ -78,13 +76,22 @@ describe('Send links from default Safari Reading List', function () {
 				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
 					{
-						'result_code': 'done'
+						url: 'http://example.com/katie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					},
 					{
-						'result_code': 'done'
+						url: 'http://example.com/lacey',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					},
 					{
-						'result_code': 'done'
+						url: 'http://example.com/@callie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					}
 				]);
 			});
@@ -95,11 +102,12 @@ describe('Send links from default Safari Reading List', function () {
 
 describe('Send links from defined Safari Reading List', function () {
 
-	before(beforeNetworkMock({
+	const mock = prepareMock({
 		links: links,
 		success: true
-	}));
-	after(afterNetworkMock);
+	});
+	before(mock.before);
+	after(mock.after);
 
 	it('should sync Safari Reading List links with Pinboard', function () {
 
@@ -110,13 +118,22 @@ describe('Send links from defined Safari Reading List', function () {
 				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
 					{
-						'result_code': 'done'
+						url: 'http://example.com/katie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					},
 					{
-						'result_code': 'done'
+						url: 'http://example.com/lacey',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					},
 					{
-						'result_code': 'done'
+						url: 'http://example.com/@callie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					}
 				]);
 			});
@@ -127,11 +144,12 @@ describe('Send links from defined Safari Reading List', function () {
 
 describe('Clear Safari Reading List', function () {
 
-	before(beforeNetworkMock({
+	const mock = prepareMock({
 		links: links,
 		success: true
-	}));
-	after(afterNetworkMock);
+	});
+	before(mock.before);
+	after(mock.after);
 
 	it('should clear Safari Reading List links when it’s finished with syncing to Pinboard', function () {
 
@@ -155,11 +173,12 @@ describe('Clear Safari Reading List', function () {
 
 describe('Don’t clean URLs', function () {
 
-	before(beforeNetworkMock({
+	const mock = prepareMock({
 		links: links,
 		success: true
-	}));
-	after(afterNetworkMock);
+	});
+	before(mock.before);
+	after(mock.after);
 
 	it('shouldn’t clean URLs before syncing Safari Reading List links with Pinboard', function () {
 
@@ -171,13 +190,22 @@ describe('Don’t clean URLs', function () {
 				assert.equal(res.length, 3);
 				assert.deepEqual(res, [
 					{
-						'result_code': 'done'
+						url: 'http://mobile.example.com/katie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					},
 					{
-						'result_code': 'done'
+						url: 'http://example.com/lacey?utm_medium=lily',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					},
 					{
-						'result_code': 'done'
+						url: 'http://example.com/@callie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
 					}
 				]);
 			});
@@ -190,11 +218,12 @@ describe('Error while contacting Pinboard', function () {
 
 	describe('Generic', function () {
 
-		before(beforeNetworkMock({
+		const mock = prepareMock({
 			links: links,
 			success: false
-		}));
-		after(afterNetworkMock);
+		});
+		before(mock.before);
+		after(mock.after);
 
 		it('should reject if syncing with Pinboard wasn’t successful', function () {
 
@@ -217,11 +246,12 @@ describe('Error while contacting Pinboard', function () {
 
 	describe('Invalid API token', function () {
 
-		before(beforeNetworkMock({
+		const mock = prepareMock({
 			links: links,
 			invalidApiToken: true
-		}));
-		after(afterNetworkMock);
+		});
+		before(mock.before);
+		after(mock.after);
 
 		it('should reject if Pinboard API token is invalid', function () {
 
