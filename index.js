@@ -50,8 +50,6 @@ function syncItem ( pinboard, item ) {
  */
 module.exports = ( fp, opts ) => {
 
-	var pinboard;
-
 	if ( typeof fp !== 'string' ) {
 		opts = fp;
 		fp = undefined; // eslint-disable-line no-undefined
@@ -65,7 +63,7 @@ module.exports = ( fp, opts ) => {
 		return Promise.reject('Pinboard API token is not provided.');
 	}
 
-	pinboard = new Pinboard(opts.apiToken);
+	const pinboard = new Pinboard(opts.apiToken);
 
 	return readList(fp)
 		.then(( data ) => {
