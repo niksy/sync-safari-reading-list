@@ -12,19 +12,36 @@ const links = './test/fixtures/links.plist';
 const apiToken = 'token';
 
 function prepareMock ( opts ) {
+
+	opts = Object.assign({
+		links: '',
+		cleanUrls: true,
+		invalidApiToken: false,
+		errorStatusCode: false,
+		success: true
+	}, opts);
+
 	const pinboard = rewire('node-pinboard');
+	let url1, url2;
+
 	return {
 		before: () => {
 			return readList(opts.links)
 				.then(( data ) => {
 					return data.map(( item ) => {
 						const parsedUrl = url.parse(item.url, true);
+						if ( opts.cleanUrls ) {
+							url1 = nock(`${parsedUrl.protocol}//${parsedUrl.hostname}`);
+						}
+						url2 = nock(pinboard.__get__('API_URL'));
 						return [
-							nock(`${parsedUrl.protocol}//${parsedUrl.hostname}`)
-								.head(parsedUrl.pathname)
-								.query(parsedUrl.query)
-								.reply(opts.errorStatusCode ? 409 : 200),
-							nock(pinboard.__get__('API_URL'))
+							(opts.cleanUrls ?
+								url1
+									.head(parsedUrl.pathname)
+									.query(parsedUrl.query)
+									.reply(opts.errorStatusCode ? 409 : 200) :
+								null),
+							url2
 								.get('/posts/add')
 								.query(true)
 								.reply(200, (opts.invalidApiToken ? undefined : { // eslint-disable-line no-undefined
@@ -36,6 +53,12 @@ function prepareMock ( opts ) {
 				});
 		},
 		after: () => {
+			if ( url1 ) {
+				url1.done();
+			}
+			if ( url2 ) {
+				url2.done();
+			}
 			nock.cleanAll();
 			pinboard();
 		}
@@ -176,6 +199,7 @@ describe('Don’t clean URLs', function () {
 
 	const mock = prepareMock({
 		links: links,
+		cleanUrls: false,
 		success: true
 	});
 	before(mock.before);
