@@ -17,8 +17,13 @@ function prepareItem ( item, cleanUrls ) {
 	const promise = cleanUrls ? got.head(item.url) : Promise.resolve({ url: item.url });
 	return promise
 		.then(( res ) => {
+			return res.url;
+		}, () => {
+			return item.url;
+		})
+		.then(( url ) => {
 			return {
-				url: cleanUrls ? stripMobileUrl(res.url) : res.url,
+				url: cleanUrls ? stripMobileUrl(url) : url,
 				description: item.title,
 				toread: 'yes'
 			};

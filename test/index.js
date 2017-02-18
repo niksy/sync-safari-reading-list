@@ -23,7 +23,7 @@ function prepareMock ( opts ) {
 							nock(`${parsedUrl.protocol}//${parsedUrl.hostname}`)
 								.head(parsedUrl.pathname)
 								.query(parsedUrl.query)
-								.reply(200),
+								.reply(opts.errorStatusCode ? 409 : 200),
 							nock(pinboard.__get__('API_URL'))
 								.get('/posts/add')
 								.query(true)
@@ -36,6 +36,7 @@ function prepareMock ( opts ) {
 				});
 		},
 		after: () => {
+			nock.cleanAll();
 			pinboard();
 		}
 	};
@@ -269,6 +270,49 @@ describe('Error while contacting Pinboard', function () {
 				});
 
 		});
+
+	});
+
+});
+
+describe('Error status code', function () {
+
+	const mock = prepareMock({
+		links: links,
+		errorStatusCode: true,
+		success: true
+	});
+	before(mock.before);
+	after(mock.after);
+
+	it('should handle error status code', function () {
+
+		return fn(links, {
+			apiToken: apiToken
+		})
+			.then(( res ) => {
+				assert.equal(res.length, 3);
+				assert.deepEqual(res, [
+					{
+						url: 'http://example.com/katie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
+					},
+					{
+						url: 'http://example.com/lacey',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
+					},
+					{
+						url: 'http://example.com/@callie',
+						pinboardResponse: {
+							'result_code': 'done'
+						}
+					}
+				]);
+			});
 
 	});
 
